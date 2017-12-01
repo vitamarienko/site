@@ -1,0 +1,26 @@
+﻿@using site.core.DataSvc
+@using site.core
+
+@model List<GoogleDriveFolder>
+
+@foreach (var chunk in Model.ChunkBy(3))
+{
+    <div class="row">
+
+        @foreach (var item in chunk)
+        {
+            <div class="col-md-4" style="background:url(@($"data:image/jpeg;base64,{item.Base64Image}")) no-repeat center;">
+                <img src="" />
+                <p>@item.Name</p>
+            </div>
+        }
+    </div>
+}
+<script>
+$(function() {
+    var div = $('.col-md-4');
+    var width = div.width();
+
+    div.css('height', width);
+});
+</script>

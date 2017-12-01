@@ -1,0 +1,7 @@
+﻿@using site.web.Models
+
+@{
+    ViewBag.Title = "Log in";
+}
+
+@Html.Partial("_ExternalLoginsListPartial", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })
