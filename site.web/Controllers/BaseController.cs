@@ -6,32 +6,35 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Runtime.Caching;
+using site.web.Utils;
 
 namespace site.web.Controllers
 {
     public class BaseController : Controller
     {
-        protected static GoogleDriveOptions Options = new GoogleDriveOptions
-        {
-            ApplicationName = "vita marienko photography",
-            SecretFileName = "client_secret.json"
-        };
-
+        protected List<GoogleDriveFolder> Categories;
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             base.OnActionExecuting(filterContext);
 
-            var categories = MemoryCache.Default.Get("categories") as List<GoogleDriveFolder>;
+            Categories = MemoryCache.Default.Get("categories") as List<GoogleDriveFolder>;
 
-            if (categories == null)
+            if (Categories == null)
             {
-                var svc = new PhotoDataSvc(new GoogleDriveSvcFactory(Options));
-                categories = Task.Run(async () => await svc.GetCategoriesAsync()).Result;
+                var dataSvc = new PhotoDataSvcWrapper();
+                Categories = Task.Run(async () => await dataSvc.GetCategoriesAsync()).Result;
 
-                MemoryCache.Default.Set("categories", categories, new CacheItemPolicy());
+#if !DEBUG
+                foreach (var category in categories)
+                {
+                    var byCategory = Task.Run(async () => await dataSvc.GetByCategoryAsync(category.Id)).Result;
+                }
+                
+#endif
+                MemoryCache.Default.Set("categories", Categories, new CacheItemPolicy());
             }
 
-            ViewBag.Categories = categories;
+            ViewBag.Categories = Categories;
         }
     }
 }

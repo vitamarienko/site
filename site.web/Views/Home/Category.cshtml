@@ -3,24 +3,29 @@
 
 @model List<GoogleDriveFolder>
 
-@foreach (var chunk in Model.ChunkBy(3))
+<div class="row">
+
+    <h1 class="col-md-offset-2 col-md-8">@ViewBag.Title</h1>
+
+</div>
+@foreach (var chunk in Model.ChunkBy(4))
 {
     <div class="row">
 
         @foreach (var item in chunk)
         {
-            <div class="col-md-4" style="background:url(@($"data:image/jpeg;base64,{item.Base64Image}")) no-repeat center;">
-                <img src="" />
-                <p>@item.Name</p>
+            <div class="title-image @(chunk.IndexOf(item) == 0 ? "col-md-offset-2" : "") col-md-2" style="background:url(@($"data:image/jpeg;base64,{item.Base64Img}")) no-repeat center;">
+                @Html.RouteLink(item.Name, "View", new { categoryId = item.ParentId, id = item.Id, title = item.Name }, new { @class = "parent-dimensions" })
+                <div class="hint">@Html.RouteLink(item.Name, "View", new { categoryId = item.ParentId, id = item.Id, title = item.Name })<span class="hint-category">Свадьба</span></div>
             </div>
         }
     </div>
 }
 <script>
-$(function() {
-    var div = $('.col-md-4');
-    var width = div.width();
+    $(function () {
+        var div = $('.title-image');
+        var width = div.width();
 
-    div.css('height', width);
-});
+        div.css('height', width);
+    });
 </script>

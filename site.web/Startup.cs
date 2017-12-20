@@ -6,6 +6,7 @@ using Microsoft.Owin.Security.Google;
 using Owin;
 using site.web.Models;
 using System;
+using System.Configuration;
 
 namespace site.web
 {
@@ -32,8 +33,8 @@ namespace site.web
 
             app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
             {
-                ClientId = "",
-                ClientSecret = ""
+                ClientId = ConfigurationManager.AppSettings["clientid"],
+                ClientSecret = ConfigurationManager.AppSettings["clientsecret"]
             });
         }
     }

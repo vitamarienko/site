@@ -48,6 +48,19 @@
             return _drive;
         }
 
+        public async Task<List<GoogleDriveImage>> GetImagesAsync(string folderId)
+        {
+            var drive = await GetDriveAsync();
+            var listRequest = drive.Files.List();
+
+            listRequest.Q = $"'{folderId}' in parents and mimeType='image/jpeg'";
+            listRequest.Fields = "files(*)";
+
+            var images = await listRequest.ExecuteAsync();
+
+            return images.Files.Select(e => new GoogleDriveImage { Id = e.Id, Url = e.WebContentLink, Portrait = e.ImageMediaMetadata.Width < e.ImageMediaMetadata.Height }).ToList();
+        }
+
         public async Task<List<GoogleDriveFolder>> GetFoldersAsync(string folderId)
         {
             var drive = await GetDriveAsync();
@@ -62,6 +75,8 @@
             foreach (var file in folders.Files)
             {
                 var folder = new GoogleDriveFolder { Id = file.Id, Name = file.Name };
+
+                folder.ParentId = file.Parents.FirstOrDefault();
 
                 result.Add(folder);
 
@@ -83,15 +98,17 @@
                     }
                 }
 
-                var imageId = images.Files.FirstOrDefault(e => Regex.IsMatch(e.Name, @"^[a-zA-Z]+$"))?.Id ?? images.Files.First().Id;
+                var image = images.Files.FirstOrDefault(e => Regex.IsMatch(e.Name, @"^[a-zA-Z]+$")) ?? images.Files.First();
+
+                folder.Url = image.WebContentLink;
 
                 using (var memoryStream = new MemoryStream())
                 {
-                    await drive.Files.Get(imageId).DownloadAsync(memoryStream);
+                    await drive.Files.Get(image.Id).DownloadAsync(memoryStream);
 
                     memoryStream.Position = 0;
 
-                    folder.Base64Image = Convert.ToBase64String(memoryStream.ToArray());
+                    folder.Base64Img = Convert.ToBase64String(memoryStream.ToArray());
                 }
             }
 
@@ -113,6 +130,8 @@
             {
                 var folder = new GoogleDriveFolder { Id = file.Id, Name = file.Name };
 
+                folder.ParentId = file.Parents.FirstOrDefault();
+
                 result.Add(folder);
 
                 listRequest.Q = $"'{file.Id}' in parents and mimeType='image/jpeg'";
@@ -125,15 +144,17 @@
                     continue;
                 }
 
-                var imageId = images.Files.FirstOrDefault(e => Regex.IsMatch(e.Name, @"^[a-zA-Z]+$"))?.Id ?? images.Files.First().Id;
+                var image = images.Files.FirstOrDefault(e => Regex.IsMatch(e.Name, @"^[a-zA-Z]+$")) ?? images.Files.First();
+
+                folder.Url = image.WebContentLink;
 
                 using (var memoryStream = new MemoryStream())
                 {
-                    await drive.Files.Get(imageId).DownloadAsync(memoryStream);
+                    await drive.Files.Get(image.Id).DownloadAsync(memoryStream);
 
                     memoryStream.Position = 0;
 
-                    folder.Base64Image = Convert.ToBase64String(memoryStream.ToArray());
+                    folder.Base64Img = Convert.ToBase64String(memoryStream.ToArray());
                 }
             }
 
@@ -141,7 +162,7 @@
         }
 
 
-        public async Task<string[]> GetFileIdsAsync(DriveService drive, string folderId)
+        public async Task<string[]> GetFileUrlsAsync(DriveService drive, string folderId)
         {
             var listRequest = drive.Files.List();
 
@@ -150,28 +171,7 @@
 
             var files = await listRequest.ExecuteAsync();
 
-            return files.Files.Select(e => e.Id).ToArray();
-        }
-
-        public async Task<string[]> GetBase64BlogPicturesAsync(string folderId)
-        {
-            var drive = await GetDriveAsync();
-            var fileIds = await GetFileIdsAsync(drive, folderId);
-            var base64Encoded = new List<string>();
-
-            foreach (var fileId in fileIds)
-            {
-                using (var memoryStream = new MemoryStream())
-                {
-                    await drive.Files.Get(fileId).DownloadAsync(memoryStream);
-
-                    memoryStream.Position = 0;
-
-                    base64Encoded.Add(Convert.ToBase64String(memoryStream.ToArray()));
-                }
-            }
-
-            return base64Encoded.ToArray();
+            return files.Files.Select(e => e.WebContentLink).ToArray();
         }
     }
 }

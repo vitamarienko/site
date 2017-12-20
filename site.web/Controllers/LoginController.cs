@@ -14,16 +14,17 @@ using site.web.Models;
 namespace site.web
 {
     [Authorize]
-    public class AccountController : Controller
+    public class LoginController : Controller
     {
+        private const string allowedEmail = "vita.marienko@gmail.com";
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
 
-        public AccountController()
+        public LoginController()
         {
         }
 
-        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
+        public LoginController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
         {
             UserManager = userManager;
             SignInManager = signInManager;
@@ -35,9 +36,9 @@ namespace site.web
             {
                 return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
             }
-            private set 
-            { 
-                _signInManager = value; 
+            private set
+            {
+                _signInManager = value;
             }
         }
 
@@ -53,6 +54,12 @@ namespace site.web
             }
         }
 
+        [AllowAnonymous]
+        public ActionResult Index()
+        {
+            return View();
+        }
+
         //
         // GET: /Account/Login
         [AllowAnonymous]
@@ -61,7 +68,7 @@ namespace site.web
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
-        
+
         //
         // POST: /Account/ExternalLogin
         [HttpPost]
@@ -70,36 +77,49 @@ namespace site.web
         public ActionResult ExternalLogin(string provider, string returnUrl)
         {
             // Request a redirect to the external login provider
-            return new ChallengeResult(provider, Url.Action("ExternalLoginCallback", "Account", new { ReturnUrl = returnUrl }));
+            return new ChallengeResult(provider, Url.Action("ExternalLoginCallback", "Login", new { ReturnUrl = returnUrl }));
         }
-        
+
         //
         // GET: /Account/ExternalLoginCallback
         [AllowAnonymous]
         public async Task<ActionResult> ExternalLoginCallback(string returnUrl)
         {
             var loginInfo = await AuthenticationManager.GetExternalLoginInfoAsync();
-            if (loginInfo == null)
+
+            if (loginInfo == null || !string.Equals(allowedEmail, loginInfo.Email, StringComparison.InvariantCultureIgnoreCase))
             {
-                return RedirectToAction("Login");
+                return RedirectToAction("Index");
+            }
+            
+            var user = await UserManager.FindByEmailAsync(loginInfo.Email);
+            
+            if(user == null)
+            {
+                user = new ApplicationUser { UserName = loginInfo.Email, Email = loginInfo.Email };
+                var createResult = await UserManager.CreateAsync(user);
+
+                if (createResult.Succeeded)
+                {
+                    var addLoginResult = await UserManager.AddLoginAsync(user.Id, loginInfo.Login);
+
+                    if (addLoginResult.Succeeded)
+                    {
+                        await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                        return RedirectToLocal(returnUrl);
+                    }
+                }
             }
 
-            // Sign in the user with this external login provider if the user already has a login
             var result = await SignInManager.ExternalSignInAsync(loginInfo, isPersistent: false);
+
             switch (result)
             {
                 case SignInStatus.Success:
                     return RedirectToLocal(returnUrl);
-                case SignInStatus.LockedOut:
-                    return View("Lockout");
-                case SignInStatus.RequiresVerification:
-                    return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = false });
                 case SignInStatus.Failure:
                 default:
-                    // If the user does not have an account, then prompt the user to create an account
-                    ViewBag.ReturnUrl = returnUrl;
-                    ViewBag.LoginProvider = loginInfo.Login.LoginProvider;
-                    return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = loginInfo.Email });
+                    return View("Index");
             }
         }
 

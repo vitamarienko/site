@@ -14,13 +14,6 @@
             this.googleDriveSvcFactory = googleDriveSvcFactory;
         }
 
-        public async Task<string[]> GetAsync(string folderId)
-        {
-            var base64Encoded = await googleDriveSvcFactory.GetBase64BlogPicturesAsync(folderId);
-
-            return base64Encoded;
-        }
-
         public async Task<List<GoogleDriveFolder>> GetByCategoryAsync(string categoryId)
         {
             return await googleDriveSvcFactory.GetFoldersByCategoryAsync(categoryId);
@@ -29,6 +22,11 @@
         public async Task<List<GoogleDriveFolder>> GetCategoriesAsync()
         {
             return await googleDriveSvcFactory.GetFoldersAsync("1XaO5XSKCLXPuszMb07p40CPce8j9VA48");
+        }
+
+        public async Task<List<GoogleDriveImage>> GetSession(string id)
+        {
+            return await googleDriveSvcFactory.GetImagesAsync(id);
         }
     }
 }
