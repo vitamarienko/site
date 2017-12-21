@@ -25,7 +25,7 @@ namespace site.web.Controllers
                 Categories = Task.Run(async () => await dataSvc.GetCategoriesAsync()).Result;
 
 #if !DEBUG
-                foreach (var category in categories)
+                foreach (var category in Categories)
                 {
                     var byCategory = Task.Run(async () => await dataSvc.GetByCategoryAsync(category.Id)).Result;
                 }
