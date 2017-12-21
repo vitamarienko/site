@@ -53,7 +53,7 @@ namespace site.web.Controllers
                 MemoryCache.Default.Remove(cacheKey);
             }
 
-            return View("Index");
+            return RedirectToAction("Index");
         }
     }
 }

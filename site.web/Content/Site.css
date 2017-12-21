@@ -105,6 +105,10 @@ textarea {
     text-align: center;
 }
 
+.navbar .navbar-nav .text-danger{
+    color: red;
+}
+
 .page-view-row .image-placeholder {
     min-height: 200px;
 }

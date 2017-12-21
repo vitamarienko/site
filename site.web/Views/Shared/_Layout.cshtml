@@ -39,7 +39,7 @@
                                 @if (User.Identity.IsAuthenticated)
                                 {
                                     <li>@Html.ActionLink("Reset", "Reset", "Home", null, new { @class = "text-danger" })</li>
-                                    <li>@Html.ActionLink("Log out", "LogOff", "Login")</li>
+                                    <li>@Html.ActionLink("Log out", "LogOff", "Login", null, new { @class = "text-danger" })</li>
                                 }
                             </ul>
                         }
