@@ -91,6 +91,10 @@ textarea {
         float: right !important;
         margin: 0;
     }
+
+    .page-view-row .image-placeholder {
+        min-height: 500px;
+    }
 }
 
 .navbar-brand {
@@ -102,9 +106,8 @@ textarea {
 }
 
 .page-view-row .image-placeholder {
-    min-height: 500px;
+    min-height: 200px;
 }
-
 .image-placeholder img {
     width: 100%;
     display: none;

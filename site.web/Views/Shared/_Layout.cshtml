@@ -25,14 +25,21 @@
                             <span class="icon-bar"></span>
                         </button>
                         @Html.ActionLink("VITA MARIENKO", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+
                     </div>
                     <div class="navbar-collapse collapse">
                         @if (categories?.Any() == true)
                         {
                             <ul class="nav navbar-nav">
                                 @foreach (var category in categories)
-                {
+                                {
                                     <li>@Html.ActionLink(category.Name, "Category", new { id = category.Id })</li>
+                                }
+
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                    <li>@Html.ActionLink("Reset", "Reset", "Home", null, new { @class = "text-danger" })</li>
+                                    <li>@Html.ActionLink("Log out", "LogOff", "Login")</li>
                                 }
                             </ul>
                         }
