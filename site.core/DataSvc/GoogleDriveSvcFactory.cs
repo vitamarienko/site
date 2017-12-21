@@ -10,6 +10,7 @@
     using Google.Apis.Drive.v3;
     using Google.Apis.Services;
     using System.Text.RegularExpressions;
+    using System.Net;
 
     public class GoogleDriveSvcFactory
     {
@@ -146,16 +147,13 @@
 
                 var image = images.Files.FirstOrDefault(e => Regex.IsMatch(e.Name, @"^[a-zA-Z]+$")) ?? images.Files.First();
 
-                folder.Url = image.WebContentLink;
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    await drive.Files.Get(image.Id).DownloadAsync(memoryStream);
-
-                    memoryStream.Position = 0;
-
-                    folder.Base64Img = Convert.ToBase64String(memoryStream.ToArray());
-                }
+                //folder.Url = image.WebContentLink;
+                HttpWebRequest httpWebRequest = WebRequest.Create(image.WebContentLink) as HttpWebRequest;
+                httpWebRequest.Method = "HEAD";
+                httpWebRequest.AllowAutoRedirect = false;
+                HttpWebResponse httpWebResponse = await httpWebRequest.GetResponseAsync() as HttpWebResponse;
+                folder.Url = httpWebResponse.StatusCode == HttpStatusCode.Redirect ? httpWebResponse.GetResponseHeader("Location") : image.WebContentLink;
+                
             }
 
             return result;

@@ -3,8 +3,55 @@
 
 @model IEnumerable<GoogleDriveImage>
 
-<section class="content">
+<script>window.pageView = true</script>
 
-    @Html.Partial("_Page", Model)
+@*<section class="content">*@
 
-</section>
+    @{
+        var offsetNeeded = true;
+        var prevPortrait = false;
+    }
+
+    <section class="row page-view-row" id="page">
+        <h1 class="col-md-8 col-md-offset-2">@ViewBag.Title</h1>
+
+        @foreach (var item in Model)
+        {
+            var classString = item.Portrait ? "col-md-4" : "col-md-8";
+
+            if (!item.Portrait)
+            {
+                offsetNeeded = true;
+            }
+            else if (item.Portrait && !prevPortrait)
+            {
+                offsetNeeded = true;
+            }
+            else if (item.Portrait && prevPortrait && !offsetNeeded)
+            {
+                offsetNeeded = true;
+            }
+            else if (item.Portrait && prevPortrait)
+            {
+                offsetNeeded = false;
+            }
+
+            if (offsetNeeded)
+            {
+                classString += " col-md-offset-2";
+            }
+
+            <div class="image-placeholder @classString" data-src="@item.Url">
+                <img />
+            </div>
+
+            prevPortrait = item.Portrait;
+        }
+
+        <div id="indicator">
+            <img src="~/Content/Infinity.gif" style="width: 40px" />
+        </div>
+
+    </section>
+
+@*</section>*@

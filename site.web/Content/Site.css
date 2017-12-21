@@ -1,6 +1,11 @@
 ﻿body {
     padding-top: 50px;
     padding-bottom: 20px;
+    font-family: 'Arimo', sans-serif;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Roboto Slab', serif;
 }
 
 /* Set padding to keep content from hitting the edges */
@@ -73,8 +78,12 @@ textarea {
     transition: background-color 0.3s, opacity 0.3s;
 }
 
-.title-image:hover .hint > a {
-    color: white;
+    .title-image:hover .hint a {
+        color: white;
+    }
+
+.navbar-nav > li > a {
+    padding: 15px 10px;
 }
 
 @media (min-width: 768px) {
@@ -92,11 +101,24 @@ textarea {
     text-align: center;
 }
 
+.page-view-row .image-placeholder {
+    min-height: 500px;
+}
+
 .image-placeholder img {
     width: 100%;
     display: none;
     border-color: transparent;
 }
+
+#indicator {
+    position: absolute;
+    width: 100%;
+    top: 150px;
+    left: 0;
+    text-align: center;
+}
+
 /*#masker {
     position: absolute;
     top: 0;
