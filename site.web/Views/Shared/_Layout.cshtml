@@ -10,7 +10,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <title>@ViewBag.Title</title>
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:300|Arimo|Quicksand" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Josefin+Slab|Montserrat|Playfair+Display" rel="stylesheet" />
     @Styles.Render("~/Content/css")
 </head>
 <body>
@@ -52,7 +53,26 @@
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+            <ul id="contactme">
+                <li id="facebook">
+                    <a target="_blank" href="https://www.facebook.com/vita.kushpil.1">
+                        <i class="fa fa-facebook" aria-hidden="true"></i>
+                    </a>
+                </li>
+                <li id="instagram">
+                    <a target="_blank" href="https://www.instagram.com/marienkophotography/">
+                        <i class="fa fa-instagram" aria-hidden="true"></i>
+                    </a>
+                </li>
+                <li id="phone">
+                    <a href="tel:+380939102386">
+                        <i class="fa fa-phone" aria-hidden="true"></i>
+                    </a>
+                </li>
+            </ul>
+            <div>
+                @DateTime.UtcNow.Year - Vita Marienko
+            </div>
         </footer>
     </div>
 

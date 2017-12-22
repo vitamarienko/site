@@ -1,5 +1,9 @@
-﻿function downloadImages(imagePlaceholders, fadeInTimeout, deferred) {
+﻿function downloadImages(imagePlaceholders, sync, deferred) {
     if (!imagePlaceholders.length) {
+
+        if(deferred&&deferred.resolve){
+            deferred.resolve();
+        }
 
         return;
     }
@@ -16,17 +20,16 @@
 
         $img.fadeIn();
 
-        if (!imagePlaceholders.length && deferred && deferred.resolve) {
-
-            deferred.resolve();
+        if(sync){
+            downloadImages(imagePlaceholders, sync, deferred);
         }
     };
 
-    img.src = current.dataset.src;
+    if (!sync) {
+        downloadImages(imagePlaceholders, sync, deferred);
+    }
 
-    setTimeout(function () {
-        return downloadImages(imagePlaceholders, fadeInTimeout, deferred);
-    }, fadeInTimeout)
+    img.src = current.dataset.src;
 }
 
 $(document).ready(function () {
@@ -41,14 +44,14 @@ $(document).ready(function () {
             $('img', $div).css('height', width);
         });
 
-        downloadImages($('.image-placeholder'), 0);
+        downloadImages($('.image-placeholder'));
     }
 
     if (window.pageView) {
 
         var deferred = $.Deferred();
 
-        downloadImages($('.image-placeholder'), 200, deferred);
+        downloadImages($('.image-placeholder'), true, deferred);
 
         deferred.done(function () {
             $('#indicator').hide();
