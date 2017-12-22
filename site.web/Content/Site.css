@@ -106,6 +106,7 @@ textarea {
 @media (max-width: 768px) {
     .navbar-brand {
         font-size: 25px;
+        padding: 19px 0;
     }
 
     footer > * {
