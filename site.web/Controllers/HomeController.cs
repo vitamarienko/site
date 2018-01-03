@@ -16,11 +16,11 @@ namespace site.web.Controllers
 
         public async Task<ActionResult> Index()
         {
-            var categoryId = ConfigurationManager.AppSettings["initialcategoryid"] 
-                ?? Categories.FirstOrDefault()?.Id 
+            var categoryAlias = ConfigurationManager.AppSettings["initialcategoryid"] 
+                ?? Categories.FirstOrDefault()?.Alias 
                 ?? "";
 
-            return RedirectToAction("Category", new { id = categoryId });
+            return RedirectToAction("Category", new { id = categoryAlias });
         }
 
         [HttpGet]
