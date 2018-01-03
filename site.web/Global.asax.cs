@@ -46,8 +46,8 @@ namespace site.web
                         await dataSvc.SeedCacheAsync();
                     }
                 })
-                .ToRunEvery(30)
-                .Seconds();
+                .ToRunEvery(5)
+                .Minutes();
         }
     }
 }
