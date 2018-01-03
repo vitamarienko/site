@@ -98,7 +98,6 @@
     <Compile Include="Extenstions.cs" />
     <Compile Include="FileSystemUtil.cs" />
     <Compile Include="ImgSet.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SiteContext.cs" />
   </ItemGroup>

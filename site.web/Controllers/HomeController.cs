@@ -23,21 +23,27 @@ namespace site.web.Controllers
             return RedirectToAction("Category", new { id = categoryId });
         }
 
+        [HttpGet]
+        [Route("{id}")]
         public async Task<ActionResult> Category(string id)
         {
-            var titles = await dataSvc.GetByCategoryAsync(id);
-            ViewBag.Title = Categories.FirstOrDefault(e => e.Id == id)?.Name;
+            var categoryId = Categories.First(e => e.Alias == id).Id;
+            var titles = await dataSvc.GetByCategoryAsync(categoryId);
+            ViewBag.Title = Categories.FirstOrDefault(e => e.Alias == id)?.Name;
 
             return View(titles);
         }
 
         [HttpGet]
-        [Route("Category/{categoryId}/View/{id}", Name = "View")]
-        public new async Task<ActionResult> View(string categoryId, string id, string title)
+        [Route("{categoryId}/{id}", Name = "View")]
+        public new async Task<ActionResult> View(string categoryId, string id)
         {
-            var items = await dataSvc.GetSessionAsync(categoryId, id);
+            var category = Categories.First(e => e.Alias == categoryId);
+            var session = category.Children.First(e => e.Alias == id);
 
-            ViewBag.Title = title;
+            var items = await dataSvc.GetSessionAsync(category.Id, session.Id);
+
+            ViewBag.Title = session.Name;
 
             return View(items);
         }

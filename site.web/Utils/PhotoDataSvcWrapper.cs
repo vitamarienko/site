@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using Kvn.Translit;
+using NLog;
 using site.core.DataSvc;
 using System;
 using System.Collections.Generic;
@@ -13,9 +14,12 @@ namespace site.web.Utils
 {
     public class PhotoDataSvcWrapper
     {
+        Logger logger;
+
         public PhotoDataSvcWrapper()
         {
             svc = new PhotoDataSvc(new GoogleDriveSvcFactory(Options));
+            logger = LogManager.GetCurrentClassLogger();
         }
 
         public void ResetCache()
@@ -33,16 +37,43 @@ namespace site.web.Utils
 
             if (categories == null)
             {
+                logger.Info("seeding cache");
+
                 var dataSvc = new PhotoDataSvcWrapper();
                 categories = await Task.Run(async () => await dataSvc.GetCategoriesAsync());
 
-#if !DEBUG
+                var translitParser = new RuEngParser();
+                var separators = new[] { ' ', ',','_','.' };
+
+                Func<string, string> aliasFactory = (e) =>
+                {
+                    return string.Join("-", 
+                        e.Split(separators, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(ee=> translitParser.Transliterate(ee)
+                        .Replace("`", "")));
+                };
+
+
+                categories.ForEach(e =>
+                {
+                    e.Alias = aliasFactory(e.Name);
+                });
+
+                //#if !DEBUG
                 foreach (var category in categories)
                 {
                     var byCategory = Task.Run(async () => await dataSvc.GetByCategoryAsync(category.Id)).Result;
+
+                    byCategory.ForEach(e =>
+                    {
+                        e.Alias = aliasFactory(e.Name);
+                        e.ParentAlias = category.Alias;
+                    });
+
+                    category.Children = byCategory;
                 }
-                
-#endif
+
+                //#endif
                 MemoryCache.Default.Set("categories", categories, new CacheItemPolicy());
             }
 
@@ -77,8 +108,6 @@ namespace site.web.Utils
             }
             catch (Exception exception)
             {
-                var logger = LogManager.GetCurrentClassLogger();
-
                 logger.Error(exception);
 
                 return false;

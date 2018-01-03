@@ -19,12 +19,12 @@
         @foreach (var item in chunk)
         {
             <div class="image-placeholder title-image @(chunk.IndexOf(item) == 0 ? "col-md-offset-2" : "") col-md-2" data-src="@item.Url">
-                <a href="@Url.RouteUrl("View", new { categoryId = item.ParentId, id = item.Id, title = item.Name })" class="parent-dimensions">
+                <a href="@Url.RouteUrl("View", new { categoryId = item.ParentAlias, id = item.Alias })" class="parent-dimensions">
                     <img />
                 </a>
                 <div class="hint">
                     <h4>
-                        <a href="@Url.RouteUrl("View", new { categoryId = item.ParentId, id = item.Id, title = item.Name })">@item.Name</a>
+                        <a href="@Url.RouteUrl("View", new { categoryId = item.ParentAlias, id = item.Alias })">@item.Name</a>
                     </h4>
                     <span class="hint-category">Свадьба</span>
                 </div>
