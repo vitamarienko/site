@@ -12,27 +12,20 @@ namespace site.web.Controllers
 {
     public class BaseController : Controller
     {
+        protected PhotoDataSvcWrapper dataSvc;
+
+        public BaseController()
+        {
+            dataSvc = new PhotoDataSvcWrapper();
+        }
+
         protected List<GoogleDriveFolder> Categories;
+
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             base.OnActionExecuting(filterContext);
 
-            Categories = MemoryCache.Default.Get("categories") as List<GoogleDriveFolder>;
-
-            if (Categories == null)
-            {
-                var dataSvc = new PhotoDataSvcWrapper();
-                Categories = Task.Run(async () => await dataSvc.GetCategoriesAsync()).Result;
-
-#if !DEBUG
-                foreach (var category in Categories)
-                {
-                    var byCategory = Task.Run(async () => await dataSvc.GetByCategoryAsync(category.Id)).Result;
-                }
-                
-#endif
-                MemoryCache.Default.Set("categories", Categories, new CacheItemPolicy());
-            }
+            Categories = Task.Run(() => dataSvc.SeedCacheAsync()).Result;
 
             ViewBag.Categories = Categories;
         }

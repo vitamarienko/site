@@ -1,7 +1,10 @@
-﻿using site.core.DataSvc;
+﻿using NLog;
+using site.core.DataSvc;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
+using System.Net;
 using System.Runtime.Caching;
 using System.Threading.Tasks;
 using System.Web;
@@ -15,6 +18,37 @@ namespace site.web.Utils
             svc = new PhotoDataSvc(new GoogleDriveSvcFactory(Options));
         }
 
+        public void ResetCache()
+        {
+            var cacheKeys = MemoryCache.Default.Select(kvp => kvp.Key).ToList();
+            foreach (string cacheKey in cacheKeys)
+            {
+                MemoryCache.Default.Remove(cacheKey);
+            }
+        }
+
+        public async Task<List<GoogleDriveFolder>> SeedCacheAsync()
+        {
+            var categories = MemoryCache.Default.Get("categories") as List<GoogleDriveFolder>;
+
+            if (categories == null)
+            {
+                var dataSvc = new PhotoDataSvcWrapper();
+                categories = await Task.Run(async () => await dataSvc.GetCategoriesAsync());
+
+#if !DEBUG
+                foreach (var category in categories)
+                {
+                    var byCategory = Task.Run(async () => await dataSvc.GetByCategoryAsync(category.Id)).Result;
+                }
+                
+#endif
+                MemoryCache.Default.Set("categories", categories, new CacheItemPolicy());
+            }
+
+            return categories;
+        }
+
         private PhotoDataSvc svc;
 
         private static GoogleDriveOptions Options = new GoogleDriveOptions
@@ -22,6 +56,50 @@ namespace site.web.Utils
             ApplicationName = "vita marienko photography",
             SecretFileName = "client_secret.json"
         };
+
+        public async Task<bool> TryGetAnyAsync()
+        {
+            var initCategoryTitles = await GetByInitialCategory();
+
+            if (initCategoryTitles?.Any() != true)
+            {
+                return false;
+            }
+
+            try
+            {
+                var firstTitle = initCategoryTitles.First();
+                var httpWebRequest = WebRequest.Create(firstTitle.Url) as HttpWebRequest;
+                httpWebRequest.Method = "GET";
+                HttpWebResponse httpWebResponse = await httpWebRequest.GetResponseAsync() as HttpWebResponse;
+
+                return httpWebResponse.StatusCode == HttpStatusCode.OK;
+            }
+            catch (Exception exception)
+            {
+                var logger = LogManager.GetCurrentClassLogger();
+
+                logger.Error(exception);
+
+                return false;
+            }
+        }
+
+        public async Task<List<GoogleDriveFolder>> GetByInitialCategory()
+        {
+            var initialCategoryId = ConfigurationManager.AppSettings["initialcategoryid"];
+            var categoryKey = $"category:{initialCategoryId}";
+            var titles = MemoryCache.Default.Get(categoryKey) as List<GoogleDriveFolder>;
+
+            if (titles == null)
+            {
+                titles = await svc.GetByCategoryAsync(initialCategoryId);
+
+                MemoryCache.Default.Set(categoryKey, titles, new CacheItemPolicy());
+            }
+
+            return titles;
+        }
 
         public async Task<List<GoogleDriveFolder>> GetByCategoryAsync(string id)
         {
@@ -37,7 +115,7 @@ namespace site.web.Utils
 
             return titles;
         }
-        
+
         public async Task<List<GoogleDriveFolder>> GetCategoriesAsync()
         {
             return await svc.GetCategoriesAsync();

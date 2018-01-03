@@ -14,11 +14,9 @@ namespace site.web.Controllers
             dataSvc = new PhotoDataSvcWrapper();
         }
 
-        private PhotoDataSvcWrapper dataSvc;
-
         public async Task<ActionResult> Index()
         {
-            var categoryId = ConfigurationManager.AppSettings["1XERe9TfEb3pWTm5Efo6o0hxvIcXZmcWY"] 
+            var categoryId = ConfigurationManager.AppSettings["initialcategoryid"] 
                 ?? Categories.FirstOrDefault()?.Id 
                 ?? "";
 
@@ -47,12 +45,8 @@ namespace site.web.Controllers
         [Authorize]
         public ActionResult Reset()
         {
-            var cacheKeys = MemoryCache.Default.Select(kvp => kvp.Key).ToList();
-            foreach (string cacheKey in cacheKeys)
-            {
-                MemoryCache.Default.Remove(cacheKey);
-            }
-
+            dataSvc.ResetCache();
+            
             return RedirectToAction("Index");
         }
     }
