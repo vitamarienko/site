@@ -22,32 +22,32 @@ namespace site.web
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            JobManager.Initialize(new DataRegistry());
+            //JobManager.Initialize(new DataRegistry());
         }
     }
 
-    public class DataRegistry : Registry
-    {
-        public DataRegistry()
-        {
-            Schedule(async
-                () =>
-                {
-                    var dataSvc = new PhotoDataSvcWrapper();
-                    var dataIsGood = await dataSvc.TryGetAnyAsync();
+    //public class DataRegistry : Registry
+    //{
+    //    public DataRegistry()
+    //    {
+    //        Schedule(async
+    //            () =>
+    //            {
+    //                var dataSvc = new PhotoDataSvcWrapper();
+    //                var dataIsGood = await dataSvc.TryGetAnyAsync();
 
-                    if (!dataIsGood)
-                    {
-                        var logger = LogManager.GetCurrentClassLogger();
+    //                if (!dataIsGood)
+    //                {
+    //                    var logger = LogManager.GetCurrentClassLogger();
 
-                        logger.Info("updating data in cache");
+    //                    logger.Info("updating data in cache");
 
-                        dataSvc.ResetCache();
-                        await dataSvc.SeedCacheAsync();
-                    }
-                })
-                .ToRunEvery(5)
-                .Minutes();
-        }
-    }
+    //                    dataSvc.ResetCache();
+    //                    await dataSvc.SeedCacheAsync();
+    //                }
+    //            })
+    //            .ToRunEvery(5)
+    //            .Minutes();
+    //    }
+    //}
 }

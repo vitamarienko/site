@@ -16,7 +16,7 @@ namespace site.web.Controllers
 
         public async Task<ActionResult> Index()
         {
-            var categoryAlias = ConfigurationManager.AppSettings["initialcategoryid"] 
+            var categoryAlias = ConfigurationManager.AppSettings["initialcategoryalias"] 
                 ?? Categories.FirstOrDefault()?.Alias 
                 ?? "";
 
@@ -24,7 +24,7 @@ namespace site.web.Controllers
         }
 
         [HttpGet]
-        [Route("{id}")]
+        [Route("categories/{id}")]
         public async Task<ActionResult> Category(string id)
         {
             var categoryId = Categories.First(e => e.Alias == id).Id;
@@ -35,7 +35,7 @@ namespace site.web.Controllers
         }
 
         [HttpGet]
-        [Route("{categoryId}/{id}", Name = "View")]
+        [Route("categories/{categoryId}/{id}", Name = "View")]
         public new async Task<ActionResult> View(string categoryId, string id)
         {
             var category = Categories.First(e => e.Alias == categoryId);
