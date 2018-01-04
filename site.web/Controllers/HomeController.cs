@@ -48,12 +48,5 @@ namespace site.web.Controllers
             return View(items);
         }
 
-        [Authorize]
-        public ActionResult Reset()
-        {
-            dataSvc.ResetCache();
-            
-            return RedirectToAction("Index");
-        }
     }
 }
