@@ -2,8 +2,16 @@
 @using site.core
 
 @model List<GoogleDriveFolder>
+
+@{
+//var categories = ViewBag.Categories as List<GoogleDriveFolder>;
+//var categoryUrl = categories.FirstOrDefault(e=>e.Children.Any())?.Children.FirstOrDefault().Url ?? string.Empty;
+}
+
 <script>
     window.pageCategory = true;
+    //window.testCategoryUrl = '@categoryUrl';
+
 </script>
 
 <div class="row">

@@ -31,11 +31,11 @@ namespace site.web.Utils
             }
         }
 
-        public async Task<List<GoogleDriveFolder>> SeedCacheAsync()
+        public async Task<List<GoogleDriveFolder>> SeedCacheAsync(bool force = false)
         {
             var categories = MemoryCache.Default.Get("categories") as List<GoogleDriveFolder>;
 
-            if (categories == null)
+            if (force || categories == null)
             {
                 logger.Info("seeding cache");
 
@@ -59,10 +59,9 @@ namespace site.web.Utils
                     e.Alias = aliasFactory(e.Name);
                 });
 
-                //#if !DEBUG
                 foreach (var category in categories)
                 {
-                    var byCategory = Task.Run(async () => await dataSvc.GetByCategoryAsync(category.Id)).Result;
+                    var byCategory = await Task.Run(async () => await dataSvc.GetByCategoryAsync(category.Id));
 
                     byCategory.ForEach(e =>
                     {
@@ -73,7 +72,7 @@ namespace site.web.Utils
                     category.Children = byCategory;
                 }
 
-                //#endif
+                MemoryCache.Default.Remove("categories");
                 MemoryCache.Default.Set("categories", categories, new CacheItemPolicy());
             }
 
@@ -124,6 +123,7 @@ namespace site.web.Utils
             {
                 titles = await svc.GetByCategoryAsync(initialCategoryId);
 
+                MemoryCache.Default.Remove(categoryKey);
                 MemoryCache.Default.Set(categoryKey, titles, new CacheItemPolicy());
             }
 
@@ -138,7 +138,8 @@ namespace site.web.Utils
             if (titles == null)
             {
                 titles = await svc.GetByCategoryAsync(id);
-
+                
+                MemoryCache.Default.Remove(categoryKey);
                 MemoryCache.Default.Set(categoryKey, titles, new CacheItemPolicy());
             }
 
@@ -159,6 +160,7 @@ namespace site.web.Utils
             {
                 items = await svc.GetSession(id);
 
+                MemoryCache.Default.Remove(sessionKey);
                 MemoryCache.Default.Set(sessionKey, items, new CacheItemPolicy());
             }
 

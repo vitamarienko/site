@@ -1,30 +1,27 @@
 ﻿using NLog;
 using site.web.Utils;
 using System.Threading.Tasks;
+using System.Web.Hosting;
 using System.Web.Mvc;
 
 namespace site.web.Controllers
 {
     public class PingController : Controller
     {
-        public async Task<ActionResult> Index()
+        public ActionResult Index()
         {
-            var logger = LogManager.GetCurrentClassLogger();
+            HostingEnvironment.QueueBackgroundWorkItem(async ct => {
 
-            logger.Info("ping");
+                var logger = LogManager.GetCurrentClassLogger();
 
-            var dataSvc = new PhotoDataSvcWrapper();
-            var dataIsGood = await dataSvc.TryGetAnyAsync();
+                logger.Info("begin update cache");
 
-            if (!dataIsGood)
-            {
-                logger.Info("updating data in cache");
+                var dataSvc = new PhotoDataSvcWrapper();
+                
+                await dataSvc.SeedCacheAsync(true);
 
-                dataSvc.ResetCache();
-                await dataSvc.SeedCacheAsync();
-
-                return Content("seed data");
-            }
+                logger.Info("end update cache");
+            });
 
             return Content("pong");
         }
