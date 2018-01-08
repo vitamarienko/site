@@ -58,38 +58,40 @@
             listRequest.Fields = "files(*)";
 
             var images = await listRequest.ExecuteAsync();
-            var pairs = new Dictionary<GoogleDriveImage, Task<WebResponse>>();
-            var tasks = new List<Task<WebResponse>>();
+            //var pairs = new Dictionary<GoogleDriveImage, Task<WebResponse>>();
+            //var tasks = new List<Task<WebResponse>>();
 
-            foreach (var image in images.Files)
-            {
-                var gDriveImage = new GoogleDriveImage
-                {
-                    Id = image.Id,
-                    Url = image.WebContentLink,
-                    Portrait = image.ImageMediaMetadata.Width < image.ImageMediaMetadata.Height
-                };
+            return images.Files.Select(e => new GoogleDriveImage { Id = e.Id, Url = e.WebContentLink, Portrait = e.ImageMediaMetadata.Width < e.ImageMediaMetadata.Height }).ToList();
 
-                HttpWebRequest httpWebRequest = WebRequest.Create(image.WebContentLink) as HttpWebRequest;
-                httpWebRequest.Method = "HEAD";
-                httpWebRequest.AllowAutoRedirect = false;
+            //foreach (var image in images.Files)
+            //{
+            //    var gDriveImage = new GoogleDriveImage
+            //    {
+            //        Id = image.Id,
+            //        Url = image.WebContentLink,
+            //        Portrait = image.ImageMediaMetadata.Width < image.ImageMediaMetadata.Height
+            //    };
 
-                var task = httpWebRequest.GetResponseAsync();
+            //    HttpWebRequest httpWebRequest = WebRequest.Create(image.WebContentLink) as HttpWebRequest;
+            //    httpWebRequest.Method = "HEAD";
+            //    httpWebRequest.AllowAutoRedirect = false;
 
-                tasks.Add(task);
-                pairs.Add(gDriveImage, task);
-            }
+            //    var task = httpWebRequest.GetResponseAsync();
 
-            await Task.Run(() => Task.WhenAll(tasks));
+            //    tasks.Add(task);
+            //    pairs.Add(gDriveImage, task);
+            //}
 
-            foreach (var pair in pairs)
-            {
-                var response = await pair.Value as HttpWebResponse;
+            //await Task.Run(() => Task.WhenAll(tasks));
 
-                pair.Key.Url = response.StatusCode == HttpStatusCode.Redirect ? response.GetResponseHeader("Location") : pair.Key.Url;
-            }
+            ////foreach (var pair in pairs)
+            ////{
+            ////    var response = await pair.Value as HttpWebResponse;
 
-            return pairs.Keys.ToList();
+            ////    pair.Key.Url = response.StatusCode == HttpStatusCode.Redirect ? response.GetResponseHeader("Location") : pair.Key.Url;
+            ////}
+
+            //return pairs.Keys.ToList();
         }
 
         public async Task<List<GoogleDriveFolder>> GetFoldersAsync(string folderId)
@@ -176,12 +178,12 @@
                 }
 
                 var image = images.Files.FirstOrDefault(e => Regex.IsMatch(e.Name, @"^[a-zA-Z]+$")) ?? images.Files.First();
-
-                HttpWebRequest httpWebRequest = WebRequest.Create(image.WebContentLink) as HttpWebRequest;
-                httpWebRequest.Method = "HEAD";
-                httpWebRequest.AllowAutoRedirect = false;
-                HttpWebResponse httpWebResponse = await httpWebRequest.GetResponseAsync() as HttpWebResponse;
-                folder.Url = httpWebResponse.StatusCode == HttpStatusCode.Redirect ? httpWebResponse.GetResponseHeader("Location") : image.WebContentLink;
+                folder.Url = image.WebContentLink;
+                //HttpWebRequest httpWebRequest = WebRequest.Create(image.WebContentLink) as HttpWebRequest;
+                //httpWebRequest.Method = "HEAD";
+                //httpWebRequest.AllowAutoRedirect = false;
+                //HttpWebResponse httpWebResponse = await httpWebRequest.GetResponseAsync() as HttpWebResponse;
+                // httpWebResponse.StatusCode == HttpStatusCode.Redirect ? httpWebResponse.GetResponseHeader("Location") : image.WebContentLink;
 
             }
 

@@ -53,7 +53,6 @@ namespace site.web.Utils
                         .Replace("`", "")));
                 };
 
-
                 categories.ForEach(e =>
                 {
                     e.Alias = aliasFactory(e.Name);

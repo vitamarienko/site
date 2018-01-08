@@ -10,18 +10,18 @@ namespace site.web.Controllers
     {
         public ActionResult Index()
         {
-            HostingEnvironment.QueueBackgroundWorkItem(async ct => {
+            //HostingEnvironment.QueueBackgroundWorkItem(async ct => {
 
-                var logger = LogManager.GetCurrentClassLogger();
+            //    var logger = LogManager.GetCurrentClassLogger();
 
-                logger.Info("begin update cache");
+            //    logger.Info("begin update cache");
 
-                var dataSvc = new PhotoDataSvcWrapper();
+            //    var dataSvc = new PhotoDataSvcWrapper();
                 
-                await dataSvc.SeedCacheAsync(true);
+            //    await dataSvc.SeedCacheAsync(true);
 
-                logger.Info("end update cache");
-            });
+            //    logger.Info("end update cache");
+            //});
 
             return Content("pong");
         }
